@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Curator Studio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="UiStyle.css">
+    <!-- Gradio  -->
+    <script src="https://cdn.jsdelivr.net/npm/@gradio/client@0.5.0/dist/index.min.js" defer></script>
+    <!-- if CDN fails -->
+    <script>
+        window.addEventListener('load', function() {
+            if (typeof gradio === 'undefined') {
+                console.warn('CDN failed to load Gradio client. Attempting fallback...');
+                const script = document.createElement('script');
+                script.src = 'gradio-client.min.js'; 
+                document.head.appendChild(script);
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-logo-section">
+                <img src="Logo.png" alt="Logo">
+            </div>
+            <h1>Virtual Curator <span>Studio</span></h1>
+        </div>
+
+        <div class="options" id="optionsSection">
+            <button onclick="showSection('painting-section')">Generate Painting</button>
+            <button onclick="showSection('scene-section')">Generate Scene</button>
+        </div>
+
+        <div id="painting-section" class="section">
+            <div class="sub-section">
+                <div class="sub-section-header" onclick="toggleSubSection(this)">
+                    <h3>1. Upload Your Image</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="sub-section-content">
+                    <div class="form-group">
+                        <div class="upload-container">
+                            <div class="file-input-wrapper">
+                                <input type="file" id="painting-upload" accept="image/*" onchange="loadImage()">
+                                <label for="painting-upload" class="file-input-label" style="color: white;">
+                                    <i class="fas fa-upload" style="color: white;"></i> Upload Image
+                                </label>
+                            </div>
+                            <div id="imagePreview">
+                                <p>No image selected</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sub-section">
+                <div class="sub-section-header" onclick="toggleSubSection(this)">
+                    <h3>2. Select Model, Size & Orientation</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="sub-section-content">
+                    <div class="form-group">
+                        <label>Select Model</label>
+                        <div class="model-selection">
+                            <div class="model-card" onclick="selectModel(this)">
+                                <img src="images.png" alt="Model 1">
+                                <p class="model-name">Adam</p>
+                            </div>
+                            <div class="model-card" onclick="selectModel(this)">
+                                <img src="images.png" alt="Model 2">
+                                <p class="model-name">Eve</p>
+                            </div>
+                            <div class="model-card" onclick="selectModel(this)">
+                                <img src="images.png" alt="Model 3">
+                                <p class="model-name">Eli</p>
+                            </div>
+                            <div class="model-card" onclick="selectModel(this)">
+                                <img src="images.png" alt="Model 4">
+                                <p class="model-name">Vyom</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Painting Size</label>
+                        <div class="size-options">
+                            <button class="size-btn" onclick="selectSize(this)">S</button>
+                            <button class="size-btn" onclick="selectSize(this)">M</button>
+                            <button class="size-btn" onclick="selectSize(this)">L</button>
+                            <button class="size-btn" onclick="selectSize(this)">XL</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Canvas Orientation</label>
+                        <div class="orientation-options">
+                            <button class="orientation-btn" onclick="selectOrientation(this)">1:1</button>
+                            <button class="orientation-btn" onclick="selectOrientation(this)">16:9</button>
+                            <button class="orientation-btn" onclick="selectOrientation(this)">9:16</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sub-section">
+                <div class="sub-section-header" onclick="toggleSubSection(this)">
+                    <h3>3. Enter Prompt & Frame Description</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="sub-section-content">
+                    <div class="form-group">
+                        <label for="base-prompt">Base Prompt</label>
+                        <textarea id="base-prompt" placeholder="Describe your vision..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="frame-description">Frame Description</label>
+                        <textarea id="frame-description" placeholder="Describe the frame style..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="clothes-accessories">Clothes/Accessories Description *</label>
+                        <textarea id="clothes-accessories" placeholder="Describe clothes or accessories (required)..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sub-section">
+                <div class="sub-section-header" onclick="toggleSubSection(this)">
+                    <h3>4. Generate Mockups & Download Painting</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="sub-section-content">
+                    <div class="btn-container">
+                        <button class="btn" onclick="generateMockups()">Generate</button>
+                    </div>
+                    <div class="mockups-container" id="mockupsContainer">
+                        <div class="mockup-card" onclick="selectMockup(this)">
+                            <img src="" alt="Mockup 1">
+                        </div>
+                        <div class="mockup-card" onclick="selectMockup(this)">
+                            <img src="" alt="Mockup 2">
+                        </div>
+                        <div class="mockup-card" onclick="selectMockup(this)">
+                            <img src="" alt="Mockup 3">
+                        </div>
+                    </div>
+                    <div class="btn-container" id="generateBtnContainer" style="display: none;">
+                        <button class="btn" onclick="generateMockup()">Generate</button>
+                    </div>
+                    <div class="final-output" id="finalOutput" style="display: none;">
+                        <img src="" alt="Final Output" id="finalImage">
+                        <div class="btn-container">
+                            <button class="btn" onclick="downloadImage()">Download</button>
+                            <button class="btn" onclick="restartProcess()">Restart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="scene-section" class="section">
+            <div class="form-group">
+                <label>Select Model</label>
+                <div class="model-selection">
+                    <div class="model-card" onclick="selectModel(this)">
+                        <img src="images.png" alt="Model 1">
+                        <p class="model-name">Adam</p>
+                    </div>
+                    <div class="model-card" onclick="selectModel(this)">
+                        <img src="images.png" alt="Model 2">
+                        <p class="model-name">Eve</p>
+                    </div>
+                    <div class="model-card" onclick="selectModel(this)">
+                        <img src="images.png" alt="Model 3">
+                        <p class="model-name">Eli</p>
+                    </div>
+                    <div class="model-card" onclick="selectModel(this)">
+                        <img src="images.png" alt="Model 4">
+                        <p class="model-name">Vyom</p>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="scene-prompt">Base Prompt</label>
+                <textarea id="scene-prompt" placeholder="Describe your scene..."></textarea>
+            </div>
+            <div class="btn-container">
+                <button class="btn" onclick="generateScene()">Generate Scene</button>
+            </div>
+            <div class="final-output" id="sceneFinalOutput" style="display: none;">
+                <img src="" alt="Final Scene Output" id="sceneFinalImage">
+                <div class="btn-container">
+                    <button class="btn" onclick="downloadSceneImage()">Download</button>
+                    <button class="btn" onclick="restartSceneProcess()">Restart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="UiFunction.js"></script>
+</body>
+</html>
